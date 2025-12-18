@@ -9,10 +9,15 @@ jobs:
     continue-on-error: false
     runs-on: ${{ matrix.os }}
     steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - run: chmod +x build-cmd.sh
       - uses: secondlife/action-autobuild@v3
         with:
           addrsize: ${{ matrix.addrsize }}
           build-variables-ref: master
+          checkout: false
   release:
     needs: build
     runs-on: [ubuntu-latest]
