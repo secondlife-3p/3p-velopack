@@ -1,0 +1,9 @@
+# Specific paths and/or names
+build-darwin-*
+build-linux-*
+build-stamp
+build-vc120*
+build-vc150*
+installed.xml
+libraries
+stage

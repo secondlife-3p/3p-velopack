@@ -1,0 +1,3 @@
+[submodule "velopack"]
+	path = velopack
+	url = https://github.com/velopack/velopack.git
