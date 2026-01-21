@@ -66,14 +66,30 @@ case "$AUTOBUILD_PLATFORM" in
         cp -a "$VELOPACK_DIR/target/release/velopack_libc.lib" "$stage/lib/release/" 2>/dev/null || true
     ;;
     darwin*)
-        # Build using cargo
+        # Build universal binaries for both arm64 and x86_64
         pushd "$VELOPACK_DIR"
-        cargo build --release -p velopack_libc
+
+        # Ensure both targets are installed
+        rustup target add aarch64-apple-darwin x86_64-apple-darwin
+
+        # Build for Apple Silicon (arm64)
+        cargo build --release -p velopack_libc --target aarch64-apple-darwin
+
+        # Build for Intel (x86_64)
+        cargo build --release -p velopack_libc --target x86_64-apple-darwin
+
         popd
 
-        # copy libs
-        cp -a "$VELOPACK_DIR/target/release/libvelopack_libc.dylib" "$stage/lib/release/"
-        cp -a "$VELOPACK_DIR/target/release/libvelopack_libc.a" "$stage/lib/release/"
+        # Create universal binaries using lipo
+        lipo -create \
+            "$VELOPACK_DIR/target/aarch64-apple-darwin/release/libvelopack_libc.dylib" \
+            "$VELOPACK_DIR/target/x86_64-apple-darwin/release/libvelopack_libc.dylib" \
+            -output "$stage/lib/release/libvelopack_libc.dylib"
+
+        lipo -create \
+            "$VELOPACK_DIR/target/aarch64-apple-darwin/release/libvelopack_libc.a" \
+            "$VELOPACK_DIR/target/x86_64-apple-darwin/release/libvelopack_libc.a" \
+            -output "$stage/lib/release/libvelopack_libc.a"
 
         # Make sure libs are stamped with the -id
         pushd "$stage/lib/release"
