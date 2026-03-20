@@ -1,20 +1,9 @@
-From: Second Life Build System <noreply@secondlife.com>
-Subject: [PATCH] setup: ignore unknown command-line arguments
-
-Legacy launchers (VMP/SLVersionChecker) may invoke Setup.exe with
-arguments it doesn't recognize, causing clap to error out. Add
-.ignore_errors(true) so unknown arguments are silently ignored
-instead of crashing the installer.
-
----
- src/bins/src/setup.rs | 1 +
- 1 file changed, 1 insertion(+)
-
 diff --git a/src/bins/src/setup.rs b/src/bins/src/setup.rs
-index 1234567..abcdefg 100644
+index b6a29a57..fd2fa0fd 100644
 --- a/src/bins/src/setup.rs
 +++ b/src/bins/src/setup.rs
-@@ -60,6 +60,7 @@ fn main_inner() -> Result<()> {
+@@ -60,6 +60,7 @@ fn main() -> Result<()> {
+ fn main_inner() -> Result<()> {
      #[rustfmt::skip]
      let mut arg_config = Command::new("Setup")
 +        .ignore_errors(true)
