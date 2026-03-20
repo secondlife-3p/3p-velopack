@@ -57,7 +57,7 @@ if [ -d "$top/patches" ]; then
     for patch in "$top/patches"/*.patch; do
         if [ -f "$patch" ]; then
             echo "Applying patch: $patch"
-            git apply "$patch" || { echo "Failed to apply $patch"; exit 1; }
+            patch -p1 < "$patch" || { echo "Failed to apply $patch"; exit 1; }
         fi
     done
     popd
