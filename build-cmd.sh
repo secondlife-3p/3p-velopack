@@ -51,6 +51,21 @@ mkdir -p "$stage/lib/release"
 VELOPACK_DIR="$top/velopack"
 LIBCPP_DIR="$VELOPACK_DIR/src/lib-cpp"
 
+# Apply patches to velopack source before building
+if [ -d "$top/patches" ]; then
+    pushd "$VELOPACK_DIR"
+    for patch in "$top/patches"/*.patch; do
+        if [ -f "$patch" ]; then
+            echo "Applying patch: $patch"
+            git apply "$patch" || { echo "Failed to apply $patch"; exit 1; }
+        fi
+    done
+    popd
+fi
+
+# Stage directory for Velopack binaries (setup.exe, update.exe)
+mkdir -p "$stage/bin"
+
 case "$AUTOBUILD_PLATFORM" in
     windows*)
         load_vsvars
@@ -58,12 +73,17 @@ case "$AUTOBUILD_PLATFORM" in
         # Build using cargo
         pushd "$VELOPACK_DIR"
         cargo build --release -p velopack_libc
+        # Build the setup and update binaries with our patches applied
+        cargo build --release -p velopack_bins --bin setup --features windows
         popd
 
         # copy libs
         cp -a "$VELOPACK_DIR/target/release/velopack_libc.dll" "$stage/lib/release/"
         cp -a "$VELOPACK_DIR/target/release/velopack_libc.dll.lib" "$stage/lib/release/" 2>/dev/null || true
         cp -a "$VELOPACK_DIR/target/release/velopack_libc.lib" "$stage/lib/release/" 2>/dev/null || true
+
+        # copy patched setup binary
+        cp -a "$VELOPACK_DIR/target/release/setup.exe" "$stage/bin/"
     ;;
     darwin*)
         # Build using cargo
