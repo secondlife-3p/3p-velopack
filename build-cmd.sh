@@ -24,10 +24,17 @@ fi
 top="$(pwd)"
 stage="$(pwd)/stage"
 
-# Get version from git describe in the submodule
-pushd "$top/velopack"
-VELOPACK_VERSION="$(git describe --tags --always 2>/dev/null || echo "0.0.0")"
-popd
+if [[ "${GITHUB_REF:-}" == refs/tags/v* ]]; then
+   # GH builds get triggered by a version tag
+    VELOPACK_VERSION="${GITHUB_REF#refs/tags/v}"
+else
+   # Get version from git describe in the submodule
+   # Won't work for shallow copies, so will result in
+   # something like 92d6a1c.39500165822 on GH
+    pushd "$top/velopack"
+    VELOPACK_VERSION="$(git describe --tags --always 2>/dev/null || echo "0.0.0")"
+    popd
+fi
 
 # load autobuild provided shell functions and variables
 source_environment_tempfile="$stage/source_environment.sh"
